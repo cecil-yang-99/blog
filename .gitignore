@@ -5,9 +5,10 @@
 /_playwright-results
 /lib
 /node_modules
+/.npm-cache
+/docs/emoji.md
 /.husky/_
 
 # exceptions
 !.gitkeep
 .vercel
-
