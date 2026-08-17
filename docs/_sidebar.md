@@ -8,14 +8,13 @@
 
 - webpack
 
-  - [优化webpack打包](webpack-optimization.md)
-  - [babel抽象语法树](babel-ash.md)
+  - [优化 webpack 打包](webpack-optimization.md)
+  - [babel 抽象语法树](babel-ash.md)
 
 - redux
 
-  - [redux原理](redux.md)
+  - [redux 原理](redux.md)
 
 - Typescript
-  
-  - [Detail](ts-detail.md)
 
+  - [Detail](ts-detail.md)

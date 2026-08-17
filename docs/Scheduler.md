@@ -1,9 +1,9 @@
-## Scheduler是什么
+## Scheduler 是什么
 
-Scheduler是一个任务调度器，它会根据任务的优先级对任务进行调用执行。
-在有多个任务的情况下，它会先执行优先级高的任务。如果一个任务执行的时间过长，Scheduler会中断当前任务，让出线程的执行权，避免造成用户操作时界面的卡顿。在下一次恢复未完成的任务的执行。
+Scheduler 是一个任务调度器，它会根据任务的优先级对任务进行调用执行。
+在有多个任务的情况下，它会先执行优先级高的任务。如果一个任务执行的时间过长，Scheduler 会中断当前任务，让出线程的执行权，避免造成用户操作时界面的卡顿。在下一次恢复未完成的任务的执行。
 
-Reac通过下面的代码让Fiber树的构建进入调度流程：
+Reac 通过下面的代码让 Fiber 树的构建进入调度流程：
 
 ```js
    function ensureRootIsScheduled(root: FiberRoot, currentTime: number){
@@ -35,11 +35,11 @@ Reac通过下面的代码让Fiber树的构建进入调度流程：
    }
 ```
 
-为什么这里需要做一次优先级的转换呢？因为React和Scheduler都是相对独立的，它们自己内部都有自己的一套优先级机制，所以当React产生的事件需要被Scheduler调度时，需要将React的事件优先级转换为Scheduler的调度优先级。
+为什么这里需要做一次优先级的转换呢？因为 React 和 Scheduler 都是相对独立的，它们自己内部都有自己的一套优先级机制，所以当 React 产生的事件需要被 Scheduler 调度时，需要将 React 的事件优先级转换为 Scheduler 的调度优先级。
 
 ## 调度入口-scheduleCallback
 
-接下来我们点进去查看scheduleCallback内部代码：
+接下来我们点进去查看 scheduleCallback 内部代码：
 
 ```js
 function scheduleCallback(priorityLevel, callback) {
@@ -52,11 +52,11 @@ function unstable_scheduleCallback(priorityLevel, callback, options) {
 }
 ```
 
-这个方法就是react与Scheduler连接的函数。
+这个方法就是 react 与 Scheduler 连接的函数。
 
-下面我们详细分析一下Sheduler的基本配置：
+下面我们详细分析一下 Sheduler 的基本配置：
 
-> Scheduler中的优先级
+> Scheduler 中的优先级
 
 ```js
 export const NoPriority = 0; //没有优先级
@@ -65,17 +65,16 @@ export const UserBlockingPriority = 2; // 用户阻塞的优先级
 export const NormalPriority = 3; // 正常优先级
 export const LowPriority = 4; // 较低的优先级
 export const IdlePriority = 5; // 优先级最低，表示任务可以闲置（在没有任务执行的时候，才会执行闲置的任务）
-
 ```
 
-> Scheduler中的任务管理队列 
+> Scheduler 中的任务管理队列
 
-Scheduler中有两个任务队列：timerQueue 和 taskQueue。 timerQueue 和 taskQueue都是最小堆的数据结构。
+Scheduler 中有两个任务队列：timerQueue 和 taskQueue。 timerQueue 和 taskQueue 都是最小堆的数据结构。
 
 1. timerQueue：所有没有过期的任务会放在这个队列中。
 2. taskQueue：所有过期的任务会放在该队列中，并且按过期时间排序，过期时间越小则排在越前面，并且越先执行。
 
-当Scheduler开始地调度任务执行时，首先会从taskQueue过期任务队列中获取任务执行，一个任务执行完成则会从taskQueue中弹出，当taskQueue中所有的任务都执行完成了，那么则会去timerQueue中检查是否有过期的任务，有的话则会拿出放到taskQueue中去执行。
+当 Scheduler 开始地调度任务执行时，首先会从 taskQueue 过期任务队列中获取任务执行，一个任务执行完成则会从 taskQueue 中弹出，当 taskQueue 中所有的任务都执行完成了，那么则会去 timerQueue 中检查是否有过期的任务，有的话则会拿出放到 taskQueue 中去执行。
 
 ```js
 function unstable_scheduleCallback(priorityLevel, callback, options) {
@@ -184,11 +183,10 @@ function unstable_scheduleCallback(priorityLevel, callback, options) {
 }
 ```
 
-scheduleCallback中主要是创建一个新的任务，并且根据任务的开始时间来判断任务是否过期，针对未过期的任务则会添加到timerQueue中，使用startTimer做为排序的依据。如果taskQueue中任务全部执行完成，则会调用requestHostTimeout，实际上这个函数是创建了一个setTimeout，把第一个任务的超时时间作为setTimeout的时间间隔调用handleTimeout。
-那么handleTimeout中又做了哪些事情，我们来看下源码：
+scheduleCallback 中主要是创建一个新的任务，并且根据任务的开始时间来判断任务是否过期，针对未过期的任务则会添加到 timerQueue 中，使用 startTimer 做为排序的依据。如果 taskQueue 中任务全部执行完成，则会调用 requestHostTimeout，实际上这个函数是创建了一个 setTimeout，把第一个任务的超时时间作为 setTimeout 的时间间隔调用 handleTimeout。
+那么 handleTimeout 中又做了哪些事情，我们来看下源码：
 
-
-```js 
+```js
 function handleTimeout(currentTime) {
   isHostTimeoutScheduled = false;
 
@@ -212,9 +210,9 @@ function handleTimeout(currentTime) {
 }
 ```
 
-handleTimeout中主要是检查timerQueue中是否有已过期的任务，有的话则会将已过期的任务添加到taskQueue中去执行。这项工作主要是advanceTimers这个函数去来实现的：
+handleTimeout 中主要是检查 timerQueue 中是否有已过期的任务，有的话则会将已过期的任务添加到 taskQueue 中去执行。这项工作主要是 advanceTimers 这个函数去来实现的：
 
-```js 
+```js
 function advanceTimers(currentTime) {
   //检查延时任务队列中是否有已过期的任务
   //有的话则将过期任务拿出添加到过期任务队列中进行执行
@@ -242,14 +240,13 @@ function advanceTimers(currentTime) {
 }
 ```
 
-针对过期的任务，则会将过期时间作为排序依据，然后调用requestHostCallback函数创建调度者开始调度流程。
+针对过期的任务，则会将过期时间作为排序依据，然后调用 requestHostCallback 函数创建调度者开始调度流程。
 
 ```js
 if (!isHostCallbackScheduled && !isPerformingWork) {
   isHostCallbackScheduled = true;
   requestHostCallback(flushWork);
 }
-
 ```
 
 创建调度者-requestHostCallback
@@ -264,7 +261,7 @@ function requestHostCallback(callback) {
 }
 ```
 
-这里我们先记住callback是调用requestHostCallback传入的flushWork函数，会在后面调用。 schedulePerformWorkUntilDeadline则是创建调度者真正的函数，我们来看下它的实现：
+这里我们先记住 callback 是调用 requestHostCallback 传入的 flushWork 函数，会在后面调用。 schedulePerformWorkUntilDeadline 则是创建调度者真正的函数，我们来看下它的实现：
 
 ```js
 let schedulePerformWorkUntilDeadline;
